@@ -59,6 +59,7 @@ p {
 <div id="wurfel"></div>
 <div id="apple"></div>
 <p id="points">Punkte: 0</p>
+<button onclick="OpenSite('https://efran457.github.io/Fun.github.io')"></button>
 
 <script>
 const wurfel = document.getElementById("wurfel");
@@ -80,7 +81,9 @@ function applePosReset() {
   score++;
   pointsDisplay.textContent = "Punkte: " + score;
 }
-
+function OpenSite(Site) {
+  window.open(Site);
+}
 applePosReset();
 
 document.addEventListener("keydown", (e) => {
