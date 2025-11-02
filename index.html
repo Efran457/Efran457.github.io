@@ -2,13 +2,13 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Fun - snake</title>
+<title>Fun - Snake</title>
 <style>
-body{
-  margin: 0;
-  height: 100vh;
-  background-color: grey;
+body {
+  background-color: #32C5FF;
+  font-family: Arial, sans-serif;
   overflow: hidden; /* verhindert Scrollbars */
+  margin: 0;
 }
 
 #apple {
@@ -16,6 +16,7 @@ body{
   height: 50px;
   background-color: green;
   position: absolute;
+  border-radius: 50%;
 }
 
 #wurfel {
@@ -26,31 +27,46 @@ body{
   top: 200px;
   left: 200px;
 }
+
+p {
+  background-color: #2599C7;
+  font-size: 18px;
+  padding: 10px;
+  border-radius: 8px;
+  color: white;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  margin: 0;
+}
 </style>
 </head>
 <body>
 <div id="wurfel"></div>
 <div id="apple"></div>
+<p id="points">Punkte: 0</p>
 
 <script>
 const wurfel = document.getElementById("wurfel");
 const apple = document.getElementById("apple");
+const pointsDisplay = document.getElementById("points");
 
 let wurfelx = 200;
 let wurfely = 200;
 let speed = 5;
-let dirY = 1;
 let dirX = 0;
-
-// store which keys are pressed
-const keys = {};
+let dirY = 0;
+let score = 0;
 
 function applePosReset() {
   const lavax = Math.random() * (window.innerWidth - 50);
   const lavay = Math.random() * (window.innerHeight - 50);
   apple.style.left = lavax + "px";
   apple.style.top = lavay + "px";
+  score++;
+  pointsDisplay.textContent = "Punkte: " + score;
 }
+
 applePosReset();
 
 document.addEventListener("keydown", (e) => {
@@ -65,10 +81,9 @@ function loop() {
   wurfely += dirY * speed;
 
   // keep cube inside the screen
-  wurfelx = Math.max(0, Math.min(window.innerWidth - 100, wurfelx));
-  wurfely = Math.max(0, Math.min(window.innerHeight - 100, wurfely));
+  wurfelx = Math.max(0, Math.min(window.innerWidth - 50, wurfelx));
+  wurfely = Math.max(0, Math.min(window.innerHeight - 50, wurfely));
 
-  // update cube position
   wurfel.style.left = wurfelx + "px";
   wurfel.style.top = wurfely + "px";
 
@@ -76,10 +91,9 @@ function loop() {
   const appleRect = apple.getBoundingClientRect();
 
   if (checkCollision(wurfelRect, appleRect)) {
-    applePosReset(); // move apple
+    applePosReset();
   }
 
-  // repeat forever
   requestAnimationFrame(loop);
 }
 
@@ -91,6 +105,7 @@ function checkCollision(rect1, rect2) {
     rect1.top > rect2.bottom
   );
 }
+
 loop();
 </script>
 </body>
