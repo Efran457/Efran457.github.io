@@ -154,11 +154,14 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 // 3️⃣ Reference to messages
-const messagesRef = ref(db, "messages");
+const record = ref(db, "Hiscore");
 
 // 4️⃣ Display messages in real-time
-onValue(messagesRef, (snapshot) => {
+onValue(record, (snapshot) => {
   const data = snapshot.val();
-  const container = document.getElementById("messagesContainer");
+  const container = document.getElementById("Record");
   container.innerHTML = "";
-</script>
+
+
+        
+        </script>
