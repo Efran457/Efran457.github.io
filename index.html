@@ -7,10 +7,9 @@
 body {
   background-color: #32C5FF;
   font-family: Arial, sans-serif;
-  overflow: hidden; /* verhindert Scrollbars */
+  overflow: hidden;
   margin: 0;
 }
-
 #apple {
   width: 50px;
   height: 50px;
@@ -18,7 +17,6 @@ body {
   position: absolute;
   border-radius: 50%;
 }
-
 #wurfel {
   width: 50px;
   height: 50px;
@@ -27,7 +25,6 @@ body {
   top: 200px;
   left: 200px;
 }
-
 p {
   background-color: #2599C7;
   font-size: 18px;
@@ -39,7 +36,9 @@ p {
   left: 10px;
   margin: 0;
 }
-
+#Record {
+  top: 50px;
+}
 button {
   background-color: #2599C7;
   color: white;
@@ -52,7 +51,6 @@ button {
   top: 10px;
   right: 10px;
 }
-
 button:hover {
   background-color: #1E7CA0;
 }
@@ -62,82 +60,15 @@ button:hover {
 <div id="wurfel"></div>
 <div id="apple"></div>
 <p id="points">Punkte: 0</p>
-<p id="Record">ladung..</p>
+<p id="Record">Lade Rekord...</p>
 <button onclick="OpenSite('https://efran457.github.io/Fun.github.io')">→</button>
 
-<script>
-const wurfel = document.getElementById("wurfel");
-const apple = document.getElementById("apple");
-const pointsDisplay = document.getElementById("points");
-
-let wurfelx = 200;
-let wurfely = 200;
-let speed = 5;
-let dirX = 0;
-let dirY = 0;
-let score = 0;
-
-function applePosReset() {
-  const lavax = Math.random() * (window.innerWidth - 50);
-  const lavay = Math.random() * (window.innerHeight - 50);
-  apple.style.left = lavax + "px";
-  apple.style.top = lavay + "px";
-  score++;
-  pointsDisplay.textContent = "Punkte: " + score;
-}
-
-function OpenSite(site) {
-  window.open(site, "_self"); // open in same tab
-}
-
-applePosReset();
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === "w" && dirY === 0) { dirX = 0; dirY = -1; }
-  if (e.key === "s" && dirY === 0) { dirX = 0; dirY = 1; }
-  if (e.key === "a" && dirX === 0) { dirX = -1; dirY = 0; }
-  if (e.key === "d" && dirX === 0) { dirX = 1; dirY = 0; }
-});
-
-function loop() {
-  wurfelx += dirX * speed;
-  wurfely += dirY * speed;
-
-  // keep cube inside the screen
-  wurfelx = Math.max(0, Math.min(window.innerWidth - 50, wurfelx));
-  wurfely = Math.max(0, Math.min(window.innerHeight - 50, wurfely));
-
-  wurfel.style.left = wurfelx + "px";
-  wurfel.style.top = wurfely + "px";
-
-  const wurfelRect = wurfel.getBoundingClientRect();
-  const appleRect = apple.getBoundingClientRect();
-
-  if (checkCollision(wurfelRect, appleRect)) {
-    applePosReset();
-  }
-
-  requestAnimationFrame(loop);
-}
-
-function checkCollision(rect1, rect2) {
-  return !(
-    rect1.right < rect2.left ||
-    rect1.left > rect2.right ||
-    rect1.bottom < rect2.top ||
-    rect1.top > rect2.bottom
-  );
-}
-
-loop();
-</script>
-</body>
-</html>
 <script type="module">
+/* ---------- Game + Firebase Setup ---------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
 
-// 1️⃣ Firebase configuration
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyC1ZYypZ4-fms45zqA_UutYFmbXQ4q3psI",
   authDomain: "imran-id123.firebaseapp.com",
@@ -149,19 +80,103 @@ const firebaseConfig = {
   measurementId: "G-EREE36DJSL"
 };
 
-// 2️⃣ Initialize Firebase
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const recordRef = ref(db, "record");
 
-// 3️⃣ Reference to messages
-const record = ref(db, "Hiscore");
+// Elements
+const wurfel = document.getElementById("wurfel");
+const apple = document.getElementById("apple");
+const pointsDisplay = document.getElementById("points");
+const recordDisplay = document.getElementById("Record");
 
-// 4️⃣ Display messages in real-time
-onValue(record, (snapshot) => {
-  const data = snapshot.val();
-  const container = document.getElementById("Record");
-  container.innerHTML = "";
+// Game Variables
+let wurfelx = 200;
+let wurfely = 200;
+let speed = 5;
+let dirX = 0;
+let dirY = 0;
+let score = 0;
+let record = 0;
+let recordLoaded = false;
 
+// 🟢 Load Record from Firebase
+onValue(recordRef, (snapshot) => {
+  const val = snapshot.val();
+  if (val !== null) {
+    record = val;
+    recordDisplay.textContent = "Rekord: " + val;
+  } else {
+    recordDisplay.textContent = "Noch kein Rekord!";
+  }
+  recordLoaded = true;
+});
 
-        
-        </script>
+// 🟢 Respawn apple and update points
+function applePosReset() {
+  const x = Math.random() * (window.innerWidth - 50);
+  const y = Math.random() * (window.innerHeight - 50);
+  apple.style.left = x + "px";
+  apple.style.top = y + "px";
+  score++;
+  pointsDisplay.textContent = "Punkte: " + score;
+
+  // ✅ Only update Firebase if new score beats record
+  if (recordLoaded && score > record) {
+    record = score;
+    recordDisplay.textContent = "Rekord: " + record;
+    set(recordRef, record);
+  }
+}
+
+// 🟢 Movement controls
+document.addEventListener("keydown", (e) => {
+  if (e.key === "w") { dirX = 0; dirY = -1; }
+  else if (e.key === "s") { dirX = 0; dirY = 1; }
+  else if (e.key === "a") { dirX = -1; dirY = 0; }
+  else if (e.key === "d") { dirX = 1; dirY = 0; }
+});
+
+// 🟢 Collision detection
+function checkCollision(rect1, rect2) {
+  return !(
+    rect1.right < rect2.left ||
+    rect1.left > rect2.right ||
+    rect1.bottom < rect2.top ||
+    rect1.top > rect2.bottom
+  );
+}
+
+// 🟢 External site button
+function OpenSite(site) {
+  window.open(site, "_self");
+}
+
+// 🟢 Game Loop
+function loop() {
+  wurfelx += dirX * speed;
+  wurfely += dirY * speed;
+
+  // Keep within screen
+  wurfelx = Math.max(0, Math.min(window.innerWidth - 50, wurfelx));
+  wurfely = Math.max(0, Math.min(window.innerHeight - 50, wurfely));
+
+  wurfel.style.left = wurfelx + "px";
+  wurfel.style.top = wurfely + "px";
+
+  const wurfelRect = wurfel.getBoundingClientRect();
+  const appleRect = apple.getBoundingClientRect();
+  if (checkCollision(wurfelRect, appleRect)) {
+    applePosReset();
+  }
+
+  requestAnimationFrame(loop);
+}
+
+// 🟢 Start game
+applePosReset();
+loop();
+</script>
+</body>
+</html>
