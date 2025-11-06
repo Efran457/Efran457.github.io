@@ -62,6 +62,7 @@ button:hover {
 <div id="wurfel"></div>
 <div id="apple"></div>
 <p id="points">Punkte: 0</p>
+<p id="Record">ladung..</p>
 <button onclick="OpenSite('https://efran457.github.io/Fun.github.io')">→</button>
 
 <script>
@@ -132,3 +133,32 @@ loop();
 </script>
 </body>
 </html>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
+
+// 1️⃣ Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyC1ZYypZ4-fms45zqA_UutYFmbXQ4q3psI",
+  authDomain: "imran-id123.firebaseapp.com",
+  databaseURL: "https://imran-id123-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "imran-id123",
+  storageBucket: "imran-id123.firebasestorage.app",
+  messagingSenderId: "397729453639",
+  appId: "1:397729453639:web:c1e77be6ca3288418d4362",
+  measurementId: "G-EREE36DJSL"
+};
+
+// 2️⃣ Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// 3️⃣ Reference to messages
+const messagesRef = ref(db, "messages");
+
+// 4️⃣ Display messages in real-time
+onValue(messagesRef, (snapshot) => {
+  const data = snapshot.val();
+  const container = document.getElementById("messagesContainer");
+  container.innerHTML = "";
+</script>
